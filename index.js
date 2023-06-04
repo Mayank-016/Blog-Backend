@@ -38,6 +38,46 @@ pool.connect((err) => {
   console.log("Connected to PostgreSQL");
 });
 
+// After establishing the database connection
+
+// Create the "users" table
+const createUsersTableQuery = `
+  CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
+  )
+`;
+pool.query(createUsersTableQuery, (err, result) => {
+  if (err) {
+    console.error("Error creating users table:", err);
+  } else {
+    console.log("Users table created");
+  }
+});
+
+// Create the "blog_posts" table
+const createBlogPostsTableQuery = `
+  CREATE TABLE IF NOT EXISTS blog_posts (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    image VARCHAR(255),
+    thumbnail VARCHAR(255),
+    user_id INT NOT NULL,
+    isActive BOOLEAN DEFAULT true,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+  )
+`;
+pool.query(createBlogPostsTableQuery, (err, result) => {
+  if (err) {
+    console.error("Error creating blog_posts table:", err);
+  } else {
+    console.log("Blog posts table created");
+  }
+});
+
 // Configure multer for handling file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
