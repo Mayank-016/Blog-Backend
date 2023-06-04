@@ -28,6 +28,7 @@ const pool = new Pool({
   host: "dpg-chu8h2d269vccp32h7tg-a.oregon-postgres.render.com",
   port: 5432,
   database: "backend_database_zfw4",
+  ssl: true, // Enable SSL/TLS
 });
 
 pool.connect((err) => {
