@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const multer = require("multer");
 const path = require("path");
 const app = express();
-const { pool } = require("pg");
+const { Pool } = require("pg");
 const session = require("express-session");
 const crypto = require("crypto");
 
@@ -21,8 +21,6 @@ app.use(
     saveUninitialized: false,
   })
 );
-
-const { Pool } = require("pg");
 
 const pool = new Pool({
   user: "root",
