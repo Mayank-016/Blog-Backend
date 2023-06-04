@@ -113,7 +113,8 @@ app.post("/signup", async (req, res) => {
     // Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
     // Insert new user into the database
-    const query = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+    const query =
+      "INSERT INTO users (name, email, password) VALUES ($1, $2, $3)";
     pool.query(query, [name, email, hashedPassword], (err, result) => {
       if (err) {
         console.error("Error creating user:", err);
@@ -133,7 +134,7 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     // Retrieve the user from the database
-    const query = "SELECT * FROM users WHERE email = ?";
+    const query = "SELECT * FROM users WHERE email = $1";
     pool.query(query, [email], async (err, results) => {
       if (err) {
         console.error("Error retrieving user:", err);
@@ -183,7 +184,7 @@ app.post(
       const userId = req.session.user_id; // Retrieve the user ID from the session
 
       // Check if the user ID exists in the users table
-      const checkUserQuery = "SELECT id FROM users WHERE id = ?";
+      const checkUserQuery = "SELECT id FROM users WHERE id = $1";
       pool.query(checkUserQuery, [userId], (err, rows) => {
         if (err) {
           console.error("Error checking user ID:", err);
@@ -200,7 +201,7 @@ app.post(
 
         // Insert new blog post into the database with user_id
         const query =
-          "INSERT INTO blog_posts (title, description, image, thumbnail, user_id) VALUES (?, ?, ?, ?, ?)";
+          "INSERT INTO blog_posts (title, description, image, thumbnail, user_id) VALUES ($1, $2, $3, $4, $5)";
         pool.query(
           query,
           [title, description, image, thumbnail, userId],
@@ -236,7 +237,7 @@ app.put("/blog/:id", isLoggedIn, upload.single("image"), async (req, res) => {
 
     // Update the blog post in the database
     const query =
-      "UPDATE blog_posts SET title = ?, description = ?, image = ?, thumbnail = ? WHERE id = ? AND user_id = ?";
+      "UPDATE blog_posts SET title = $1, description = $2, image = $3, thumbnail = $4 WHERE id = $5 AND user_id = $6";
     const userId = req.session.user_id; // Retrieve the user ID from the session
     pool.query(
       query,
@@ -269,7 +270,7 @@ app.delete("/blog/:id", isLoggedIn, async (req, res) => {
     const userId = req.session.user_id;
 
     // Check if the logged-in user is the owner of the blog post
-    const query = "SELECT * FROM blog_posts WHERE id = ? AND user_id = ?";
+    const query = "SELECT * FROM blog_posts WHERE id = $1 AND user_id = $2";
     pool.query(query, [postId, userId], (err, results) => {
       if (err) {
         console.error("Error retrieving blog post:", err);
@@ -282,7 +283,7 @@ app.delete("/blog/:id", isLoggedIn, async (req, res) => {
       }
 
       // Delete the blog post from the database
-      const deleteQuery = "DELETE FROM blog_posts WHERE id = ?";
+      const deleteQuery = "DELETE FROM blog_posts WHERE id = $1";
       pool.query(deleteQuery, [postId], (deleteErr, deleteResult) => {
         if (deleteErr) {
           console.error("Error deleting blog post:", deleteErr);
@@ -306,7 +307,7 @@ app.get("/blog", isLoggedIn, async (req, res) => {
 
     // Retrieve all blog posts of the logged-in user
     const query =
-      "SELECT * FROM blog_posts WHERE user_id = ? AND isActive = true";
+      "SELECT * FROM blog_posts WHERE user_id = $1 AND isActive = true";
     pool.query(query, [userId], (err, results) => {
       if (err) {
         console.error("Error retrieving blog posts:", err);
@@ -328,7 +329,7 @@ app.get("/blog/:id", isLoggedIn, async (req, res) => {
 
     // Retrieve the blog post from the database based on post ID and user ID
     const query =
-      "SELECT * FROM blog_posts WHERE id = ? AND user_id = ? AND isActive = true";
+      "SELECT * FROM blog_posts WHERE id = $1 AND user_id = $2 AND isActive = true";
     pool.query(query, [postId, userId], (err, results) => {
       if (err) {
         console.error("Error retrieving blog post:", err);
@@ -354,7 +355,7 @@ app.post("/blog/copy/:id", isLoggedIn, async (req, res) => {
     const userId = req.session.user_id;
 
     // Retrieve the original blog post from the database based on the provided ID and user ID
-    const query = "SELECT * FROM blog_posts WHERE id = ? AND user_id = ?";
+    const query = "SELECT * FROM blog_posts WHERE id = $1 AND user_id = $2";
     pool.query(query, [originalPostId, userId], async (err, results) => {
       if (err) {
         console.error("Error retrieving blog post:", err);
@@ -370,7 +371,7 @@ app.post("/blog/copy/:id", isLoggedIn, async (req, res) => {
       // Create a new blog post with the same data as the original post
       const { title, description, image, thumbnail } = originalBlogPost;
       const createQuery =
-        "INSERT INTO blog_posts (title, description, image, thumbnail, user_id) VALUES (?, ?, ?, ?, ?)";
+        "INSERT INTO blog_posts (title, description, image, thumbnail, user_id) VALUES ($1, $2, $3, $4, $5)";
       pool.query(
         createQuery,
         [title, description, image, thumbnail, userId],
@@ -398,7 +399,7 @@ app.put("/blog/:id/active", isLoggedIn, async (req, res) => {
 
     // Check if the blog post belongs to the logged-in user
     const checkOwnershipQuery =
-      "SELECT * FROM blog_posts WHERE id = ? AND user_id = ? ";
+      "SELECT * FROM blog_posts WHERE id = $1 AND user_id = $2 ";
     pool.query(checkOwnershipQuery, [postId, userId], (err, results) => {
       if (err) {
         console.error("Error retrieving blog post:", err);
@@ -413,7 +414,7 @@ app.put("/blog/:id/active", isLoggedIn, async (req, res) => {
       const isActive = req.body.isActive;
 
       // Update the active status of the blog post
-      const updateQuery = "UPDATE blog_posts SET isActive = ? WHERE id = ?";
+      const updateQuery = "UPDATE blog_posts SET isActive = $1 WHERE id = $2";
       pool.query(updateQuery, [isActive, postId], (updateErr, updateResult) => {
         if (updateErr) {
           console.error("Error updating blog post:", updateErr);
